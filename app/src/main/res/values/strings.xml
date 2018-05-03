@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Client_nitai</string>
+    <string name="recognizedText"></string>
+    <string name="title">Title</string>
+    <string name="summery">Summery</string>
+    <string name="catchapp">CatchApp</string>
+    <string name="hello">hello</string>
+    <string-array name="planets_array">
+        <item>EN</item>
+        <item>FR</item>
+        <item>ES</item>
+        <item>DE</item>
+        <item>CN</item>
+        <item>HE</item>
+        <item>IT</item>
+    </string-array>
+
+
+</resources>
