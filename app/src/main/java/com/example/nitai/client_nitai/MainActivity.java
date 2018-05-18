@@ -35,8 +35,8 @@ public class MainActivity extends AppCompatActivity {
 
     public static SpeechRecognizer mSpeechRecognizer;
     public static Intent mSpeechRecognizerIntent;
-    public static Map<String, Object> wikiMap;
-    public static BlockingQueue<Pair<String, Object>> wikiMapQueue;
+    public static Map<String, WikiObject> wikiMap;
+    public static BlockingQueue<Pair<String, WikiObject>> wikiMapQueue;
 
     public static BlockingQueue<String> textRecognizedQueue;
     public static BlockingQueue<String> phrasesQueue;
@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         textRecognizedQueue = new LinkedBlockingQueue<>();
         phrasesQueue = new LinkedBlockingQueue<>();
         btnSpeak = findViewById(R.id.btnSpeak);
-        recognizedText = findViewById(R.id.recognitionText);
+        //recognizedText = findViewById(R.id.recognitionText);
         termTitle = findViewById(R.id.title);
         btnSpeak.setOnClickListener(recognitionButtonListener);
     }
@@ -84,32 +84,18 @@ public class MainActivity extends AppCompatActivity {
         transaction.commit();
         Thread phrasesThread = new Thread(new PhrasesThread());
         Thread wikiThread = new Thread(new WikiThread());
-        Thread objectsThread = new Thread(new ObjectsThread());
         if (!clicked) {
             clicked = true;
             setSpeechRecognizer();
             phrasesThread.start();
             wikiThread.start();
-            //objectsThread.start();
             ObjectPopAsyncTask asyncTask = new ObjectPopAsyncTask(this);
             asyncTask.execute(wikiMapQueue);
-//            runOnUiThread(new Runnable() {
-//                public void run() {
-//                    Pair pair = null;
-//                    try {
-//                        pair = wikiMapQueue.take();
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                    Toast.makeText(context, "hello", Toast.LENGTH_SHORT);
-//                }
-//            });
             //phrasesThread.join();
             //wikiThread.join();
-            TextView recognizedText = findViewById(R.id.recognitionText);
-            recognizedText.setText("");
+            //TextView recognizedText = findViewById(R.id.recognitionText);
+            //recognizedText.setText("");
             //btnSpeak.setText("Listening...");
-
         } else {
             mSpeechRecognizer.stopListening();
             //btnSpeak.setText("Catchapp");
@@ -129,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onNewPair(Pair pair) {
         Log.i("MainActivity", pair.toString());
-        bubbles.popBubble(pair);
+        bubbles.popBubble(pair, wikiMap);
     }
 
     private void setSpeechRecognizer() {

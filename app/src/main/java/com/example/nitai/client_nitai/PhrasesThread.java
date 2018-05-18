@@ -21,7 +21,7 @@ public class PhrasesThread extends MainActivity implements Runnable {
 
     @Override
     public void run() {
-        while(true) {
+        while (true) {
             try {
                 String text = textRecognizedQueue.take();
                 MyGetRequest(text);
@@ -39,17 +39,14 @@ public class PhrasesThread extends MainActivity implements Runnable {
                         try {
                             JSONArray phrasesArray = response.getJSONArray("phrases");
                             for (int i = 0; i < phrasesArray.length(); i++) {
-                                if (!wikiMap.containsKey(phrasesArray.getString(i))) {
-                                    phrasesQueue.put(phrasesArray.getString(i));
-                                }
+                                phrasesQueue.put(phrasesArray.getString(i));
                             }
                         } catch (JSONException | InterruptedException e) {
                             return;
                         }
                     }
                 },
-                new Response.ErrorListener()
-                {
+                new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.d("Error.Response", String.valueOf(error));

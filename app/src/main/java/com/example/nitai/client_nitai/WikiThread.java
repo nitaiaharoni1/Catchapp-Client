@@ -77,10 +77,10 @@ public class WikiThread extends MainActivity implements Runnable {
         Iterator<String> keys = obj.keys();
         while (keys.hasNext()) {
             String key = keys.next();
-            wikiMap.put(key, obj.getJSONObject(key));
-            Pair wikiObj = new Pair(key, obj.getJSONObject(key));
-            wikiMapQueue.put(wikiObj);
-            //Log.i("i", wikiMap.get(key).toString());
+            WikiObject wikiObject = new WikiObject(obj.getJSONObject(key));
+            wikiMap.put(wikiObject.getTitle(), wikiObject);
+            Pair wikiPair = new Pair(wikiObject.getTitle(), wikiObject);
+            wikiMapQueue.put(wikiPair);
         }
     }
 }

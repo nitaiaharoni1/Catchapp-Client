@@ -7,7 +7,7 @@ import android.util.Pair;
 import java.io.Serializable;
 import java.util.concurrent.BlockingQueue;
 
-public class ObjectPopAsyncTask extends AsyncTask<BlockingQueue<Pair<String, Object>>, Pair<String, Object>, Void> {
+public class ObjectPopAsyncTask extends AsyncTask<BlockingQueue<Pair<String, WikiObject>>, Pair<String, WikiObject>, Void> {
 
     MainActivity activity;
 
@@ -16,7 +16,7 @@ public class ObjectPopAsyncTask extends AsyncTask<BlockingQueue<Pair<String, Obj
     }
 
     @Override
-    protected Void doInBackground(BlockingQueue<Pair<String, Object>>... blockingQueues) {
+    protected Void doInBackground(BlockingQueue<Pair<String, WikiObject>>... blockingQueues) {
         while (!isCancelled()) {
             try {
                 Pair pair = blockingQueues[0].take();
@@ -33,7 +33,7 @@ public class ObjectPopAsyncTask extends AsyncTask<BlockingQueue<Pair<String, Obj
     }
 
     @Override
-    protected void onProgressUpdate(Pair<String, Object>... pairs) {
+    protected void onProgressUpdate(Pair<String, WikiObject>... pairs) {
         activity.onNewPair(pairs[0]);
     }
 

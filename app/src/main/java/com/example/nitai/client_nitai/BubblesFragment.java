@@ -12,6 +12,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.Map;
+
 import co.intentservice.chatui.ChatView;
 import co.intentservice.chatui.models.ChatMessage;
 
@@ -19,8 +21,10 @@ public class BubblesFragment extends android.support.v4.app.Fragment {
 
     View view;
     ChatView chatView;
+    ListView listView;
 
     private ChatMessage.Type type = ChatMessage.Type.RECEIVED;
+    private Map<String, WikiObject> wikiMap;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -33,17 +37,8 @@ public class BubblesFragment extends android.support.v4.app.Fragment {
                 return false;
             }
         });
-        ListView a = chatView.findViewById(R.id.chat_list);
-        ListView.OnItemClickListener onItemClickListener = new ListView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                TextView title = view.findViewById(co.intentservice.chatui.R.id.message_text_view);
-                TextView timeStamp = view.findViewById(co.intentservice.chatui.R.id.timestamp_text_view);
-                Log.i("BubbleFragment", title.getText().toString());
-                timeStamp.setText("sadlkjwslkjvbhlsdhfvblhsdvljhbsdkjhvb");
-            }
-        };
-        a.setOnItemClickListener(onItemClickListener);
+        listView = chatView.findViewById(R.id.chat_list);
+        listView.setOnItemClickListener(onBubbleClickListener);
         return view;
     }
 
@@ -57,9 +52,30 @@ public class BubblesFragment extends android.support.v4.app.Fragment {
         }
     }
 
-    public void popBubble(Pair pair) {
+    private void onBubbleClicked() {
+        TextView title = view.findViewById(co.intentservice.chatui.R.id.message_text_view);
+        TextView timeStamp = view.findViewById(co.intentservice.chatui.R.id.timestamp_text_view);
+        WikiObject wikiObject = wikiMap.get(title.getText().toString());
+        String summery = wikiObject.getSummery();
+        Log.i("BubbleFragment", title.getText().toString());
+        timeStamp.setText(summery);
+    }
+
+    public void popBubble(Pair pair, Map<String, WikiObject> wikiMap) {
         ChatMessage bubble = new ChatMessage(pair.first.toString(), System.currentTimeMillis(), randomChatMessageType());
         chatView.addMessage(bubble);
+        listView = chatView.findViewById(R.id.chat_list);
+        this.wikiMap = wikiMap;
 
     }
+
+    ListView.OnItemClickListener onBubbleClickListener = new ListView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            onBubbleClicked();
+        }
+    };
+
+
 }
+
