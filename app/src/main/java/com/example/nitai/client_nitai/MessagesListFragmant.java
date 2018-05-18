@@ -91,7 +91,7 @@ public class MessagesListFragmant extends android.support.v4.app.Fragment implem
             return flip;
         }
     }
-
+//
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
