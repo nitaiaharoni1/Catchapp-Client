@@ -3,7 +3,9 @@ package com.example.nitai.client_nitai;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class WikiObject {
+import java.io.Serializable;
+
+public class WikiObject implements Serializable {
     String title;
     String summery;
     String url;

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -28,10 +29,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 
 public class MainActivity extends AppCompatActivity {
-    BubblesFragment bubbles;
+    MessagesListFragmant messagesList;
 
     public static SpeechRecognizer mSpeechRecognizer;
     public static Intent mSpeechRecognizerIntent;
@@ -45,12 +47,6 @@ public class MainActivity extends AppCompatActivity {
     public Boolean clicked = false;
     public String userLanguage = "EN";
     public ImageButton btnSpeak;
-    public TextView recognizedText;
-    public TextView termTitle;
-
-    public String getUserLanguage() {
-        return userLanguage;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,9 +59,7 @@ public class MainActivity extends AppCompatActivity {
         wikiMapQueue = new LinkedBlockingQueue<>();
         textRecognizedQueue = new LinkedBlockingQueue<>();
         phrasesQueue = new LinkedBlockingQueue<>();
-        btnSpeak = findViewById(R.id.btnSpeak);
-        //recognizedText = findViewById(R.id.recognitionText);
-        termTitle = findViewById(R.id.title);
+        btnSpeak = (ImageButton) findViewById(R.id.btnSpeak);
         btnSpeak.setOnClickListener(recognitionButtonListener);
     }
 
@@ -77,9 +71,9 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private void onRecognitionButtonClicked() {
-        bubbles = new BubblesFragment();
+        messagesList = new MessagesListFragmant();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragmantViewHolder, bubbles);
+        transaction.replace(R.id.fragmantViewHolder, messagesList);
         transaction.addToBackStack(null);
         transaction.commit();
         Thread phrasesThread = new Thread(new PhrasesThread());
@@ -91,14 +85,12 @@ public class MainActivity extends AppCompatActivity {
             wikiThread.start();
             ObjectPopAsyncTask asyncTask = new ObjectPopAsyncTask(this);
             asyncTask.execute(wikiMapQueue);
+
+
             //phrasesThread.join();
             //wikiThread.join();
-            //TextView recognizedText = findViewById(R.id.recognitionText);
-            //recognizedText.setText("");
-            //btnSpeak.setText("Listening...");
         } else {
             mSpeechRecognizer.stopListening();
-            //btnSpeak.setText("Catchapp");
             clicked = false;
         }
     }
@@ -115,7 +107,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void onNewPair(Pair pair) {
         Log.i("MainActivity", pair.toString());
-        bubbles.popBubble(pair, wikiMap);
+        messagesList.popBubble(pair, wikiMap);
+        //messagesList.popBubble("check");
     }
 
     private void setSpeechRecognizer() {
@@ -124,12 +117,12 @@ public class MainActivity extends AppCompatActivity {
         mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
         mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-        mSpeechRecognizer.setRecognitionListener(new recoListener());
+        mSpeechRecognizer.setRecognitionListener(new recoListener(0));
         mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
     }
 
     private void languageSpinner() {
-        Spinner spinner = findViewById(R.id.userLang);
+        Spinner spinner = (Spinner) findViewById(R.id.userLang);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.planets_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
@@ -138,12 +131,11 @@ public class MainActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> adapterView, View view,
                                        int position, long id) {
                 Object item = adapterView.getItemAtPosition(position);
-                if (!item.toString().equals(getUserLanguage())) {
+                if (!item.toString().equals(userLanguage)) {
                     userLanguage = item.toString();
                     if (mSpeechRecognizer != null) {
                         mSpeechRecognizer.stopListening();
                     }
-                    //btnSpeak.setText("Catchapp");
                     clicked = false;
                 }
             }

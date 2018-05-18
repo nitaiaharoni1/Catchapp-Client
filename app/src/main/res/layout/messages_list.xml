@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+
+    <com.stfalcon.chatkit.messages.MessagesList
+        android:id="@+id/messagesList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/holo_orange_dark"
+        android:isScrollContainer="true"
+        android:saveEnabled="true"
+        android:soundEffectsEnabled="true"
+        app:incomingDefaultBubbleColor="@android:color/holo_orange_light"
+        app:incomingDefaultBubblePressedColor="@android:color/holo_purple"
+        app:incomingTextColor="@android:color/background_light"
+        app:incomingTimeTextColor="@android:color/holo_orange_light"
+        app:outcomingDefaultBubbleColor="@color/orange_2"
+        app:outcomingDefaultBubblePressedColor="@android:color/holo_purple"
+        app:outcomingTextColor="@android:color/background_light"
+        app:outcomingTimeTextColor="@color/orange_2"
+        app:textAutoLink="all">
+
+    </com.stfalcon.chatkit.messages.MessagesList>
+</RelativeLayout>

@@ -3,10 +3,17 @@ package com.example.nitai.client_nitai;
 import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.SpeechRecognizer;
+import android.util.Log;
 
 import java.util.ArrayList;
 
 public class recoListener extends MainActivity implements RecognitionListener {
+
+    private int counter;
+
+    public recoListener(int i) {
+        this.counter = i;
+    }
 
     @Override
     public void onResults(Bundle bundle) {
@@ -17,9 +24,7 @@ public class recoListener extends MainActivity implements RecognitionListener {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
-        } else{
-            mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
+            //mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
         }
     }
 
@@ -48,14 +53,19 @@ public class recoListener extends MainActivity implements RecognitionListener {
     @Override
     public void onEndOfSpeech() {
         mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
+
     }
 
     @Override
     public void onError(int i) {
+        //mSpeechRecognizer.stopListening();
+        //mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
         mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
     }
 
     @Override
     public void onEvent(int i, Bundle bundle) {
+        mSpeechRecognizer.stopListening();
+        mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
     }
 }
