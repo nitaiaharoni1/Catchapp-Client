@@ -10,6 +10,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.widget.AdapterView;
@@ -17,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
@@ -29,6 +31,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 
 public class MainActivity extends AppCompatActivity {
+    BubblesFragment bubbles;
+
     public static SpeechRecognizer mSpeechRecognizer;
     public static Intent mSpeechRecognizerIntent;
     public static Map<String, Object> wikiMap;
@@ -73,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private void onRecognitionButtonClicked() {
-        BubblesFragment bubbles = new BubblesFragment();
+        bubbles = new BubblesFragment();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragmantViewHolder, bubbles);
         transaction.addToBackStack(null);
@@ -86,7 +90,9 @@ public class MainActivity extends AppCompatActivity {
             setSpeechRecognizer();
             phrasesThread.start();
             wikiThread.start();
-            objectsThread.start();
+            //objectsThread.start();
+            ObjectPopAsyncTask asyncTask = new ObjectPopAsyncTask(this);
+            asyncTask.execute(wikiMapQueue);
 //            runOnUiThread(new Runnable() {
 //                public void run() {
 //                    Pair pair = null;
@@ -119,6 +125,11 @@ public class MainActivity extends AppCompatActivity {
         } else {
             //do something?
         }
+    }
+
+    public void onNewPair(Pair pair) {
+        Log.i("MainActivity", pair.toString());
+        bubbles.popBubble(pair);
     }
 
     private void setSpeechRecognizer() {

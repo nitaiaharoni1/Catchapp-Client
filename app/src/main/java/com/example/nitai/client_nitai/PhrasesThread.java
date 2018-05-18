@@ -44,7 +44,7 @@ public class PhrasesThread extends MainActivity implements Runnable {
                                 }
                             }
                         } catch (JSONException | InterruptedException e) {
-                            e.printStackTrace();
+                            return;
                         }
                     }
                 },
