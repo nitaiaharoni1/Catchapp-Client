@@ -1,19 +1,20 @@
 package com.example.nitai.client_nitai;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Pair;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -26,22 +27,22 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+
 public class MainActivity extends AppCompatActivity {
     public static SpeechRecognizer mSpeechRecognizer;
     public static Intent mSpeechRecognizerIntent;
     public static Map<String, Object> wikiMap;
+    public static BlockingQueue<Pair<String, Object>> wikiMapQueue;
+
     public static BlockingQueue<String> textRecognizedQueue;
     public static BlockingQueue<String> phrasesQueue;
     public static RequestQueue queue;
 
     public Boolean clicked = false;
     public String userLanguage = "EN";
-    public Button btnSpeak;
+    public ImageButton btnSpeak;
     public TextView recognizedText;
     public TextView termTitle;
-    public TextView termSummery;
-    public Context context;
-
 
     public String getUserLanguage() {
         return userLanguage;
@@ -55,12 +56,12 @@ public class MainActivity extends AppCompatActivity {
         languageSpinner();
         queue = Volley.newRequestQueue(this);
         wikiMap = new HashMap<>();
+        wikiMapQueue = new LinkedBlockingQueue<>();
         textRecognizedQueue = new LinkedBlockingQueue<>();
         phrasesQueue = new LinkedBlockingQueue<>();
         btnSpeak = findViewById(R.id.btnSpeak);
         recognizedText = findViewById(R.id.recognitionText);
         termTitle = findViewById(R.id.title);
-        termSummery = findViewById(R.id.summery);
         btnSpeak.setOnClickListener(recognitionButtonListener);
     }
 
@@ -72,21 +73,40 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private void onRecognitionButtonClicked() {
+        BubblesFragment bubbles = new BubblesFragment();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragmantViewHolder, bubbles);
+        transaction.addToBackStack(null);
+        transaction.commit();
+        Thread phrasesThread = new Thread(new PhrasesThread());
+        Thread wikiThread = new Thread(new WikiThread());
+        Thread objectsThread = new Thread(new ObjectsThread());
         if (!clicked) {
             clicked = true;
             setSpeechRecognizer();
-            Thread phrasesThread = new Thread(new PhrasesThread());
-            Thread wikiThread = new Thread(new WikiThread());
             phrasesThread.start();
             wikiThread.start();
+            objectsThread.start();
+//            runOnUiThread(new Runnable() {
+//                public void run() {
+//                    Pair pair = null;
+//                    try {
+//                        pair = wikiMapQueue.take();
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                    Toast.makeText(context, "hello", Toast.LENGTH_SHORT);
+//                }
+//            });
             //phrasesThread.join();
             //wikiThread.join();
             TextView recognizedText = findViewById(R.id.recognitionText);
             recognizedText.setText("");
-            btnSpeak.setText("Listening...");
+            //btnSpeak.setText("Listening...");
+
         } else {
             mSpeechRecognizer.stopListening();
-            btnSpeak.setText("Catchapp");
+            //btnSpeak.setText("Catchapp");
             clicked = false;
         }
     }
@@ -101,17 +121,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setSpeechRecognizer(){
+    private void setSpeechRecognizer() {
         mSpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
         mSpeechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
+        mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
         mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
         mSpeechRecognizer.setRecognitionListener(new recoListener());
         mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
     }
 
-        private void languageSpinner() {
+    private void languageSpinner() {
         Spinner spinner = findViewById(R.id.userLang);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.planets_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -121,12 +141,12 @@ public class MainActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> adapterView, View view,
                                        int position, long id) {
                 Object item = adapterView.getItemAtPosition(position);
-                if (item.toString() != getUserLanguage()) {
+                if (!item.toString().equals(getUserLanguage())) {
                     userLanguage = item.toString();
                     if (mSpeechRecognizer != null) {
                         mSpeechRecognizer.stopListening();
                     }
-                    btnSpeak.setText("Catchapp");
+                    //btnSpeak.setText("Catchapp");
                     clicked = false;
                 }
             }
@@ -136,5 +156,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
 
 }

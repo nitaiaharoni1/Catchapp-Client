@@ -1,6 +1,7 @@
 package com.example.nitai.client_nitai;
 
 import android.util.Log;
+import android.util.Pair;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -43,6 +44,8 @@ public class WikiThread extends MainActivity implements Runnable {
                             addPhrases(response);
                         } catch (JSONException e) {
                             e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
                     }
                 },
@@ -70,12 +73,14 @@ public class WikiThread extends MainActivity implements Runnable {
 
     }
 
-    public static void addPhrases(JSONObject obj) throws JSONException {
+    public static void addPhrases(JSONObject obj) throws JSONException, InterruptedException {
         Iterator<String> keys = obj.keys();
         while (keys.hasNext()) {
             String key = keys.next();
             wikiMap.put(key, obj.getJSONObject(key));
-            Log.i("i", wikiMap.get(key).toString());
+            Pair wikiObj = new Pair(key, obj.getJSONObject(key));
+            wikiMapQueue.put(wikiObj);
+            //Log.i("i", wikiMap.get(key).toString());
         }
     }
 }

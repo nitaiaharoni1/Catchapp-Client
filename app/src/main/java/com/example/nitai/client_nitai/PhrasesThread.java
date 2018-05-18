@@ -52,7 +52,6 @@ public class PhrasesThread extends MainActivity implements Runnable {
                 {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(context, String.valueOf(error), Toast.LENGTH_LONG).show();
                         Log.d("Error.Response", String.valueOf(error));
                     }
                 })

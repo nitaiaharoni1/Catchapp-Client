@@ -18,6 +18,8 @@ public class recoListener extends MainActivity implements RecognitionListener {
                 e.printStackTrace();
             }
             mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
+        } else{
+            mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
         }
     }
 
@@ -45,10 +47,12 @@ public class recoListener extends MainActivity implements RecognitionListener {
 
     @Override
     public void onEndOfSpeech() {
+        mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
     }
 
     @Override
     public void onError(int i) {
+        mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
     }
 
     @Override
