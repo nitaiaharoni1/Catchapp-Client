@@ -26,6 +26,8 @@ public class PhrasesThread extends MainActivity implements Runnable {
         while (true) {
             try {
                 String text = textRecognizedQueue.take();
+                Log.i("phrasesThread", "String taken: " +text);
+
                 MyGetRequest(text);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -40,6 +42,8 @@ public class PhrasesThread extends MainActivity implements Runnable {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
+                            Log.i("phrasesThread:", "server response");
+
                             addPhrases(response);
                         } catch (JSONException | InterruptedException e) {
                             e.printStackTrace();
@@ -71,6 +75,7 @@ public class PhrasesThread extends MainActivity implements Runnable {
             String key = keys.next();
             WikiObject wikiObject = new WikiObject(obj.getJSONObject(key));
             wikiMap.put(wikiObject.getTitle(), wikiObject);
+            Log.i("phrasesThread:", "new object: " + wikiObject.getTitle());
             Pair<String, WikiObject> wikiPair = new Pair<>(wikiObject.getTitle(), wikiObject);
             wikiMapQueue.put(wikiPair);
         }

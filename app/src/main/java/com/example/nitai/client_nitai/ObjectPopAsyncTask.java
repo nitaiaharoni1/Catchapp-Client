@@ -2,6 +2,7 @@ package com.example.nitai.client_nitai;
 
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.util.Pair;
 
 import java.util.concurrent.BlockingQueue;
@@ -23,6 +24,8 @@ public class ObjectPopAsyncTask extends AsyncTask<BlockingQueue<Pair<String, Wik
         while (!isCancelled()) {
             try {
                 Pair pair = wikiMapQueue.take();
+                Log.i("bubblePop", "object taken: : " + pair.first.toString());
+
                 this.publishProgress(pair);
             } catch (InterruptedException e) {
                 e.printStackTrace();

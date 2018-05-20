@@ -3,6 +3,7 @@ package com.example.nitai.client_nitai;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -66,6 +67,7 @@ public class MessagesListFragmant extends android.support.v4.app.Fragment implem
         Author author = new Author(flippingInt(), "", null);
         Message message = new Message("", pair.first.toString(), author, new Date());
         adapter.addToStart(message, true);
+        Log.i("bubblePop", "new bubble: : " + pair.first.toString());
         this.wikiMap = wikiMap;
     }
 

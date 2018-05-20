@@ -136,7 +136,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onNewPair(Pair pair) {
-        Log.i("MainActivity", pair.toString());
         messagesList.popBubble(pair, wikiMap);
     }
 
