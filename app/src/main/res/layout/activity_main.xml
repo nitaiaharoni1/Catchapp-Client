@@ -9,13 +9,4 @@
     tools:context="com.example.nitai.client_nitai.MainActivity">
 
 
-    <fragment
-        android:id="@+id/fragment3"
-        android:name="com.example.nitai.client_nitai.ButtonFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentStart="true"
-        android:layout_centerVertical="true"
-        tools:layout="@layout/fragment_button" />
-
 </RelativeLayout>

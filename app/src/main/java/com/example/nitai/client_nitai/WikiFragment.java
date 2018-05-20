@@ -21,8 +21,6 @@ public class WikiFragment extends android.support.v4.app.Fragment{
     private TextView summery;
     private ImageView image;
 
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_wiki,container,false);
@@ -41,6 +39,16 @@ public class WikiFragment extends android.support.v4.app.Fragment{
 //        }
 
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
     }
 
     @Override

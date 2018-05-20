@@ -1,6 +1,7 @@
 package com.example.nitai.client_nitai;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -16,54 +17,74 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.Pair;
-import android.view.View;
-import android.widget.AdapterView;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
-import android.widget.ImageButton;
-import android.widget.Spinner;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 
 public class MainActivity extends AppCompatActivity {
-    static MessagesListFragmant messagesList;
-    ButtonFragment buttonFragment;
-    public ImageButton btnSpeak;
-
+    public static MessagesListFragmant messagesList;
+    public static AudioManager audioManager;
+    @SuppressLint("StaticFieldLeak")
+    public static ButtonFragment buttonFragment;
+    public static ArrayAdapter<CharSequence> adapter;
     public static SpeechRecognizer mSpeechRecognizer;
     public static Intent mSpeechRecognizerIntent;
     public static Map<String, WikiObject> wikiMap;
     public static BlockingQueue<Pair<String, WikiObject>> wikiMapQueue;
-
+    public static Queue<Pair<String, WikiObject>> wikiMapQueue2;
     public static BlockingQueue<String> textRecognizedQueue;
-    public static BlockingQueue<String> phrasesQueue;
     public static RequestQueue queue;
+    public static ObjectPopAsyncTask asyncTask;
+    public static Thread phrasesThread;
+    public static String userLanguage = "EN";
 
-    Thread phrasesThread;
-
-    public String userLanguage = "EN";
+    public static void setUserLanguage(String userLanguage) {
+        MainActivity.userLanguage = userLanguage;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         checkPermission();
-        languageSpinner();
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         queue = Volley.newRequestQueue(this);
         wikiMap = new HashMap<>();
         wikiMapQueue = new LinkedBlockingQueue<>();
+        wikiMapQueue2 = new LinkedList<>();
         textRecognizedQueue = new LinkedBlockingQueue<>();
-        phrasesQueue = new LinkedBlockingQueue<>();
         buttonFragment = new ButtonFragment();
         messagesList = new MessagesListFragmant();
-        btnSpeak = (ImageButton) findViewById(R.id.btnSpeak);
-        btnSpeak.setOnClickListener(recognitionButtonListener);
+        phrasesThread = new Thread(new PhrasesThread());
+        asyncTask = new ObjectPopAsyncTask();
+        adapter = ArrayAdapter.createFromResource(this, R.array.planets_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragmantViewHolder, buttonFragment, "buttonFragment");
+        transaction.commit();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if (getSupportFragmentManager().findFragmentByTag("buttonFragment").isVisible() == true) {
+            phrasesThread.interrupt();
+            asyncTask.cancel(true);
+            mSpeechRecognizer.destroy();
+        } else if (getSupportFragmentManager().findFragmentByTag("messageListFragment").isVisible() == true) {
+        }
     }
 
     @Override
@@ -82,7 +103,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        mSpeechRecognizer.stopListening();
         mSpeechRecognizer.destroy();
     }
 
@@ -96,28 +116,6 @@ public class MainActivity extends AppCompatActivity {
         phrasesThread.interrupt();
     }
 
-    View.OnClickListener recognitionButtonListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            onRecognitionButtonClicked();
-        }
-    };
-
-    public void onRecognitionButtonClicked() {
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragmantViewHolder, messagesList);
-        transaction.addToBackStack(null);
-        transaction.commit();
-        setSpeechRecognizer();
-        phrasesThread = new Thread(new PhrasesThread());
-        phrasesThread.start();
-        ObjectPopAsyncTask asyncTask = new ObjectPopAsyncTask(this);
-        asyncTask.execute(wikiMapQueue);
-        //silence();
-        //phrasesThread.join();
-        //wikiThread.join();
-    }
-
     private void checkPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
@@ -129,46 +127,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    public void silence() {
-        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        assert audioManager != null;
+    public static void silence() {
         audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_MUTE, 0);
     }
 
-    public void onNewPair(Pair pair) {
-        messagesList.popBubble(pair, wikiMap);
-    }
+//    public static void onNewPair(Pair pair) {
+//        messagesList.popBubble(pair);
+//    }
 
-    private void setSpeechRecognizer() {
-        mSpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+    public static void setSpeechRecognizer() {
         mSpeechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
         //mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "he");
         mSpeechRecognizer.setRecognitionListener(new recoListener());
         mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
     }
 
-    private void languageSpinner() {
-        Spinner spinner = (Spinner) findViewById(R.id.userLang);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.planets_array, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view,
-                                       int position, long id) {
-                Object item = adapterView.getItemAtPosition(position);
-                if (!item.toString().equals(userLanguage)) {
-                    userLanguage = item.toString();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
+    public static void startThreads() {
+        phrasesThread = new Thread(new PhrasesThread());
+        asyncTask = new ObjectPopAsyncTask();
+        phrasesThread.start();
+        asyncTask.execute(wikiMapQueue);
     }
-
 
 }

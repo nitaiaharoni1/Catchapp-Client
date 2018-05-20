@@ -15,12 +15,11 @@ import com.stfalcon.chatkit.messages.MessagesList;
 import com.stfalcon.chatkit.messages.MessagesListAdapter;
 
 import java.util.Date;
-import java.util.Map;
+
 
 public class MessagesListFragmant extends android.support.v4.app.Fragment implements MessagesListAdapter.SelectionListener,
         MessagesListAdapter.OnLoadMoreListener {
 
-    private Map<String, WikiObject> wikiMap;
     private MessagesListAdapter<Message> adapter;
     private String flip = "0";
 
@@ -28,22 +27,33 @@ public class MessagesListFragmant extends android.support.v4.app.Fragment implem
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.messages_list, container, false);
         adapter = new MessagesListAdapter<>("0", null);
-
         MessagesList messagesList = view.findViewById(R.id.messagesList);
         messagesList.setAdapter(adapter);
         adapter.setOnMessageClickListener(onMessageClickListener);
-
-
         adapter.setOnMessageLongClickListener(onMessageLongClickListener);
-
         return view;
     }
 
-    MessagesListAdapter.OnMessageLongClickListener onMessageLongClickListener = new MessagesListAdapter.OnMessageLongClickListener(){
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        flippingInt();
+        popAllBubbles();
+    }
+
+    @Override
+    public void onLoadMore(int page, int totalItemsCount) {
+        Log.d("check", "onLoadMore: ");
+        Log.d("", "onResume: ");
+
+
+    }
+
+    MessagesListAdapter.OnMessageLongClickListener onMessageLongClickListener = new MessagesListAdapter.OnMessageLongClickListener() {
 
         @Override
         public void onMessageLongClick(IMessage message) {
-            WikiObject wikiObject = wikiMap.get(message.getText());
+            WikiObject wikiObject = MainActivity.wikiMap.get(message.getText());
             Bundle bundle = new Bundle();
             bundle.putSerializable("wikiObject", wikiObject);
             WikiFragment wikiFragment = new WikiFragment();
@@ -55,6 +65,7 @@ public class MessagesListFragmant extends android.support.v4.app.Fragment implem
         }
     };
 
+
     MessagesListAdapter.OnMessageClickListener onMessageClickListener = new MessagesListAdapter.OnMessageClickListener() {
         @Override
         public void onMessageClick(IMessage message) {
@@ -62,33 +73,32 @@ public class MessagesListFragmant extends android.support.v4.app.Fragment implem
         }
     };
 
+    public void popAllBubbles() {
+        Pair pair;
+        int size = MainActivity.wikiMapQueue2.size();
+        for (int i = 0; i < size; i++) {
+            pair = MainActivity.wikiMapQueue2.poll();
+            MainActivity.wikiMapQueue2.add(pair);
+            popBubble(pair);
+            Log.i("bubblePop", "new bubble: : " + pair.first.toString());
+        }
+    }
 
-    public void popBubble(Pair pair, Map<String, WikiObject> wikiMap) {
+    public void popBubble(Pair pair) {
         Author author = new Author(flippingInt(), "", null);
         Message message = new Message("", pair.first.toString(), author, new Date());
         adapter.addToStart(message, true);
         Log.i("bubblePop", "new bubble: : " + pair.first.toString());
-        this.wikiMap = wikiMap;
     }
 
-        public String flippingInt() {
-        if (flip.equals("0")){
+    public String flippingInt() {
+        if (flip.equals("0")) {
             flip = "1";
             return flip;
-        } else{
+        } else {
             flip = "0";
             return flip;
         }
-    }
-//
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-    }
-
-    @Override
-    public void onLoadMore(int page, int totalItemsCount) {
-
     }
 
     @Override

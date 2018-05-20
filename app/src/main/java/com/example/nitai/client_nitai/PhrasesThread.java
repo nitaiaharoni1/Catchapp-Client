@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import static com.example.nitai.client_nitai.Utils.BASE_URL;
 
 @SuppressLint("Registered")
 public class PhrasesThread extends MainActivity implements Runnable {
@@ -37,7 +36,7 @@ public class PhrasesThread extends MainActivity implements Runnable {
     }
 
     public void MyGetRequest(final String text) {
-        JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, BASE_URL + "phrases", null,
+        JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, Utils.BASE_URL + "phrases", null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
