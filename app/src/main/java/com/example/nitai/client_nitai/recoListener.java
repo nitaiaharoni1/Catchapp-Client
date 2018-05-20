@@ -60,18 +60,19 @@ public class recoListener extends MainActivity implements RecognitionListener {
 
     @Override
     public void onEndOfSpeech() {
-        //mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
     }
 
     @Override
     public void onError(int i) {
-        //mSpeechRecognizer.cancel();
         Log.i("recoListener", "error: " + i);
-
-        if (i!=8){
+        if( i == 6 || i == 7){
+            mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
+        }
+        else if (i!=8){
             mSpeechRecognizer.stopListening();
             mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
         }
+
     }
 
     @Override
