@@ -1,22 +1,24 @@
 package com.example.nitai.client_nitai;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
-import android.widget.Toast;
+import android.util.Pair;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import static com.example.nitai.client_nitai.Utils.BASE_URL;
 
+@SuppressLint("Registered")
 public class PhrasesThread extends MainActivity implements Runnable {
 
     @Override
@@ -27,6 +29,7 @@ public class PhrasesThread extends MainActivity implements Runnable {
                 MyGetRequest(text);
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                return;
             }
         }
     }
@@ -37,12 +40,9 @@ public class PhrasesThread extends MainActivity implements Runnable {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            JSONArray phrasesArray = response.getJSONArray("phrases");
-                            for (int i = 0; i < phrasesArray.length(); i++) {
-                                phrasesQueue.put(phrasesArray.getString(i));
-                            }
+                            addPhrases(response);
                         } catch (JSONException | InterruptedException e) {
-                            return;
+                            e.printStackTrace();
                         }
                     }
                 },
@@ -58,9 +58,21 @@ public class PhrasesThread extends MainActivity implements Runnable {
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
                 headers.put("text", text);
+                headers.put("lang", userLanguage);
                 return headers;
             }
         };
         queue.add(getRequest);
+    }
+
+    public static void addPhrases(JSONObject obj) throws JSONException, InterruptedException {
+        Iterator<String> keys = obj.keys();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            WikiObject wikiObject = new WikiObject(obj.getJSONObject(key));
+            wikiMap.put(wikiObject.getTitle(), wikiObject);
+            Pair<String, WikiObject> wikiPair = new Pair<>(wikiObject.getTitle(), wikiObject);
+            wikiMapQueue.put(wikiPair);
+        }
     }
 }

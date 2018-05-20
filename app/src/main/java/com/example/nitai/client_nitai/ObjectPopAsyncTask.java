@@ -1,25 +1,28 @@
 package com.example.nitai.client_nitai;
 
-import android.content.Intent;
+import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.util.Pair;
 
-import java.io.Serializable;
 import java.util.concurrent.BlockingQueue;
+
+import static com.example.nitai.client_nitai.MainActivity.wikiMapQueue;
 
 public class ObjectPopAsyncTask extends AsyncTask<BlockingQueue<Pair<String, WikiObject>>, Pair<String, WikiObject>, Void> {
 
-    MainActivity activity;
+    @SuppressLint("StaticFieldLeak")
+    private MainActivity activity;
 
-    public ObjectPopAsyncTask(MainActivity activity) {
+    ObjectPopAsyncTask(MainActivity activity) {
         this.activity = activity;
     }
 
+    @SafeVarargs
     @Override
-    protected Void doInBackground(BlockingQueue<Pair<String, WikiObject>>... blockingQueues) {
+    protected final Void doInBackground(BlockingQueue<Pair<String, WikiObject>>... blockingQueues) {
         while (!isCancelled()) {
             try {
-                Pair pair = blockingQueues[0].take();
+                Pair pair = wikiMapQueue.take();
                 this.publishProgress(pair);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -32,8 +35,9 @@ public class ObjectPopAsyncTask extends AsyncTask<BlockingQueue<Pair<String, Wik
     protected void onPostExecute(Void a) {
     }
 
+    @SafeVarargs
     @Override
-    protected void onProgressUpdate(Pair<String, WikiObject>... pairs) {
+    protected final void onProgressUpdate(Pair<String, WikiObject>... pairs) {
         activity.onNewPair(pairs[0]);
     }
 
