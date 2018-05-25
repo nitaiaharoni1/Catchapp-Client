@@ -7,30 +7,37 @@ import java.io.Serializable;
 
 public class WikiObject implements Serializable {
     String title;
-    String summery;
-    String url;
+    private String englishTitle;
+    private String summary;
+    private String url;
     String image;
 
-    public WikiObject(String title, String summery, String url, String image) {
-        this.title = title;
-        this.summery = summery;
-        this.url = url;
-        this.image = image;
+    WikiObject(JSONObject jsonObject) {
+        try {
+            this.title = jsonObject.getString("title");
+            this.summary = jsonObject.getString("summary");
+            this.url = jsonObject.getString("url");
+            this.englishTitle = jsonObject.getString("englishTitle");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        try {
+            this.image = jsonObject.getString("image");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
-    public WikiObject(JSONObject jsonObject) throws JSONException {
-        this.title = jsonObject.getString("title");
-        this.summery = jsonObject.getString("summery");
-        this.url = jsonObject.getString("url");
-        this.image = jsonObject.getString("image");
+    public String getEnglishTitle() {
+        return englishTitle;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public String getSummery() {
-        return summery;
+    public String getSummary() {
+        return summary;
     }
 
     public String getUrl() {

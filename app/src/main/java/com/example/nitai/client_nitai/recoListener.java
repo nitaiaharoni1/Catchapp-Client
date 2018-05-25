@@ -18,7 +18,7 @@ public class recoListener extends MainActivity implements RecognitionListener {
         mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
         try {
             if (matches != null) {
-                textRecognizedQueue.put(matches.get(0));
+                MainActivity.textRecognizedQueue.put(matches.get(0));
                 Log.i("recoListener", "matches: " + matches.get(0));
 
             }
@@ -34,11 +34,16 @@ public class recoListener extends MainActivity implements RecognitionListener {
 
     @Override
     public void onReadyForSpeech(Bundle bundle) {
+        MainActivity.silence();
+        Log.i("", "onBeginningOfSpeech: ");
+        startAnim();
+//        visualization(this);
+//        MainActivity.audioVisualization.onResume();
     }
 
     @Override
     public void onBeginningOfSpeech() {
-        //flag = 0;
+        MainActivity.silence();
     }
 
     @Override
@@ -51,10 +56,12 @@ public class recoListener extends MainActivity implements RecognitionListener {
 
     @Override
     public void onEndOfSpeech() {
+        stopAnim();
     }
 
     @Override
     public void onError(int i) {
+        stopAnim();
         Log.i("recoListener", "error: " + i);
         mSpeechRecognizer.destroy();
         mSpeechRecognizer.setRecognitionListener(new recoListener());
@@ -64,4 +71,6 @@ public class recoListener extends MainActivity implements RecognitionListener {
     @Override
     public void onEvent(int i, Bundle bundle) {
     }
+
+
 }

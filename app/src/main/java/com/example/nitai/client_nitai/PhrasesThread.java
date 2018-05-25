@@ -25,7 +25,7 @@ public class PhrasesThread extends MainActivity implements Runnable {
         while (true) {
             try {
                 String text = textRecognizedQueue.take();
-                Log.i("phrasesThread", "String taken: " +text);
+                Log.i("phrasesThread", "String taken: " + text);
 
                 MyGetRequest(text);
             } catch (InterruptedException e) {
@@ -42,7 +42,6 @@ public class PhrasesThread extends MainActivity implements Runnable {
                     public void onResponse(JSONObject response) {
                         try {
                             Log.i("phrasesThread:", "server response");
-
                             addPhrases(response);
                         } catch (JSONException | InterruptedException e) {
                             e.printStackTrace();
@@ -72,11 +71,15 @@ public class PhrasesThread extends MainActivity implements Runnable {
         Iterator<String> keys = obj.keys();
         while (keys.hasNext()) {
             String key = keys.next();
-            WikiObject wikiObject = new WikiObject(obj.getJSONObject(key));
-            wikiMap.put(wikiObject.getTitle(), wikiObject);
-            Log.i("phrasesThread:", "new object: " + wikiObject.getTitle());
-            Pair<String, WikiObject> wikiPair = new Pair<>(wikiObject.getTitle(), wikiObject);
-            wikiMapQueue.put(wikiPair);
+            if (!key.contains("Error")) {
+                WikiObject wikiObject = new WikiObject(obj.getJSONObject(key));
+                wikiMap.put(wikiObject.getEnglishTitle(), wikiObject);
+                Log.i("phrasesThread:", "new object: " + wikiObject.getTitle());
+                Pair<String, WikiObject> wikiPair = new Pair<>(wikiObject.getEnglishTitle(), wikiObject);
+                wikiMapQueue.put(wikiPair);
+            } else {
+                Log.e("ServerError", obj.getJSONObject(key).toString());
+            }
         }
     }
 }

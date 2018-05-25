@@ -1,16 +1,23 @@
 package com.example.nitai.client_nitai;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.Spinner;
 
 import com.stfalcon.chatkit.commons.models.IMessage;
 import com.stfalcon.chatkit.commons.models.IUser;
+import com.stfalcon.chatkit.messages.MessageInput;
 import com.stfalcon.chatkit.messages.MessagesList;
 import com.stfalcon.chatkit.messages.MessagesListAdapter;
 
@@ -23,6 +30,8 @@ public class MessagesListFragmant extends android.support.v4.app.Fragment implem
     private MessagesListAdapter<Message> adapter;
     private String flip = "0";
 
+    @SuppressLint("ResourceType")
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.messages_list, container, false);
@@ -31,37 +40,57 @@ public class MessagesListFragmant extends android.support.v4.app.Fragment implem
         messagesList.setAdapter(adapter);
         adapter.setOnMessageClickListener(onMessageClickListener);
         adapter.setOnMessageLongClickListener(onMessageLongClickListener);
+        MainActivity.mListeningView1 = view.findViewById(R.id.avi1);
+        MessageInput inputView = view.findViewById(R.id.input);
+        inputView.setInputListener(new MessageInput.InputListener() {
+            @Override
+            public boolean onSubmit(CharSequence input) {
+                try {
+                    MainActivity.textRecognizedQueue.put(input.toString());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return true;
+            }
+        });
+        Spinner spinner2 = view.findViewById(R.id.userLang2);
+        spinner2.setAdapter(MainActivity.adapter);
+        spinner2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view,
+                                       int position, long id) {
+                Object item = adapterView.getItemAtPosition(position);
+                if (!item.toString().equals(MainActivity.userLanguage)) {
+                    MainActivity.setUserLanguage(MainActivity.languageMap.get(item.toString()));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
         return view;
     }
+
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        flippingInt();
+        flip = "0";
         popAllBubbles();
     }
 
     @Override
-    public void onLoadMore(int page, int totalItemsCount) {
-        Log.d("check", "onLoadMore: ");
-        Log.d("", "onResume: ");
-
-
+    public void onStart() {
+        super.onStart();
+        MainActivity.mSpeechRecognizer.destroy();
+        MainActivity.mSpeechRecognizer.setRecognitionListener(new recoListener());
+        MainActivity.mSpeechRecognizer.startListening(MainActivity.mSpeechRecognizerIntent);
     }
 
     MessagesListAdapter.OnMessageLongClickListener onMessageLongClickListener = new MessagesListAdapter.OnMessageLongClickListener() {
-
         @Override
         public void onMessageLongClick(IMessage message) {
-            WikiObject wikiObject = MainActivity.wikiMap.get(message.getText());
-            Bundle bundle = new Bundle();
-            bundle.putSerializable("wikiObject", wikiObject);
-            WikiFragment wikiFragment = new WikiFragment();
-            wikiFragment.setArguments(bundle);
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragmantViewHolder, wikiFragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
         }
     };
 
@@ -69,7 +98,14 @@ public class MessagesListFragmant extends android.support.v4.app.Fragment implem
     MessagesListAdapter.OnMessageClickListener onMessageClickListener = new MessagesListAdapter.OnMessageClickListener() {
         @Override
         public void onMessageClick(IMessage message) {
-
+            WikiObject wikiObject = MainActivity.wikiMap.get(message.getText());
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("wikiObject", wikiObject);
+            MainActivity.wikiFragment.setArguments(bundle);
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragmantViewHolder, MainActivity.wikiFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
         }
     };
 
@@ -106,12 +142,15 @@ public class MessagesListFragmant extends android.support.v4.app.Fragment implem
 
     }
 
+    @Override
+    public void onLoadMore(int page, int totalItemsCount) {
+    }
+
     public class Message implements IMessage {
         private String id;
         private String text;
         private Author author;
         private Date createdAt;
-
 
         Message(String id, String text, Author author, Date createdAt) {
             this.id = id;

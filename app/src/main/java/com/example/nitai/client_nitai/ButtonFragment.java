@@ -5,12 +5,15 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.Spinner;
+
+import io.saeid.fabloading.LoadingView;
 
 
 public class ButtonFragment extends android.support.v4.app.Fragment {
@@ -23,27 +26,67 @@ public class ButtonFragment extends android.support.v4.app.Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ImageButton btnSpeak = view.findViewById(R.id.btnSpeak);
-        btnSpeak.setOnClickListener(recognitionButtonListener);
-        Spinner spinner = view.findViewById(R.id.userLang);
-        spinner.setAdapter(MainActivity.adapter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view,
-                                       int position, long id) {
-                Object item = adapterView.getItemAtPosition(position);
-                if (!item.toString().equals(MainActivity.userLanguage)) {
-                    MainActivity.setUserLanguage(item.toString());
-                }
-            }
+        ImageButton mLoadingView = view.findViewById(R.id.loading_view);
+        mLoadingView.setOnClickListener(recognitionButtonListener);
+        MainActivity.mLoadingView = view.findViewById(R.id.loading_view);
+        MainActivity.addLoadingView();
+//        Spinner spinner = view.findViewById(R.id.userLang);
+//        spinner.setAdapter(MainActivity.adapter);
+//        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> adapterView, View view,
+//                                       int position, long id) {
+//                Object item = adapterView.getItemAtPosition(position);
+//                if (!item.toString().equals(MainActivity.userLanguage)) {
+//                    MainActivity.setUserLanguage(MainActivity.languageMap.get(item.toString()));
+//                }
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//            }
+//        });
 
+        MainActivity.mLoadingView.addListener(new LoadingView.LoadingListener() {
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+            public void onAnimationStart(int currentItemPosition) {
+                Log.d("", "onAnimationRepeat: ");
+
+            }
+            @Override
+            public void onAnimationRepeat(int nextItemPosition) {
+                //MainActivity.mLoadingView.resumeAnimation();
+                Log.d("", "onAnimationRepeat: ");
+
+
+            }
+            @Override
+            public void onAnimationEnd(int nextItemPosition) {
+                MainActivity.mLoadingView.startAnimation();
+
             }
         });
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        MainActivity.mLoadingView.pauseAnimation();
 
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        MainActivity.mLoadingView.startAnimation();
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        MainActivity.mLoadingView.resumeAnimation();
+    }
 
     View.OnClickListener recognitionButtonListener = new View.OnClickListener() {
         @RequiresApi(api = Build.VERSION_CODES.M)
@@ -53,20 +96,18 @@ public class ButtonFragment extends android.support.v4.app.Fragment {
         }
     };
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     public void onRecognitionButtonClicked() {
         MainActivity.setSpeechRecognizer();
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(R.id.fragmantViewHolder, MainActivity.messagesList, "messageListFragment");
         transaction.addToBackStack(null);
         transaction.commit();
-        if ( (MainActivity.phrasesThread.getState().name().equals("NEW") || MainActivity.phrasesThread.getState().name().equals("TERMINATED")) && (MainActivity.asyncTask.getStatus().name().equals("PENDING") || MainActivity.asyncTask.getStatus().name().equals("FINISHED"))){
+        if ((MainActivity.phrasesThread.getState().name().equals("NEW") || MainActivity.phrasesThread.getState().name().equals("TERMINATED")) && (MainActivity.asyncTask.getStatus().name().equals("PENDING") || MainActivity.asyncTask.getStatus().name().equals("FINISHED"))) {
             MainActivity.startThreads();
         }
         //MainActivity.silence();
         //phrasesThread.join();
         //wikiThread.join();
     }
-
-
 }
+
