@@ -8,9 +8,9 @@ CatchApp is an academic project that was developed in the Media Innovation Lab (
 ## Video
 [![CatchApp Video](https://img.youtube.com/vi/aHP8iXopoiI/0.jpg)](https://www.youtube.com/watch?v=aHP8iXopoiI)
 ## Screenshots
-![](media/img6.jpeg )
-![](media/img1.jpeg)
-![](media/img4.jpeg)
-![](media/img5.jpeg)
-![](media/img3.jpeg)
-![](media/img2.jpeg)
+![](media/img11.jpeg)
+![](media/img22.jpeg)
+![](media/img33.jpeg)
+![](media/img44.jpeg)
+![](media/img55.jpeg)
+![](media/img66.jpeg)
