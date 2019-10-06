@@ -5,7 +5,7 @@ CatchApp is an academic project that was developed in the Media Innovation Lab (
 [Google Play - CatchApp](https://play.google.com/store/apps/details?id=com.catchapp.nitai.client_nitai)
 
 
-## Video
+## Explanation Video
 [![CatchApp Video](https://img.youtube.com/vi/aHP8iXopoiI/0.jpg)](https://www.youtube.com/watch?v=aHP8iXopoiI)
 ## Screenshots
 ![](media/img11.jpeg)
