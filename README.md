@@ -7,8 +7,8 @@ CatchApp is an academic project that was developed in the Media Innovation Lab (
 
 ## Screenshots
 ##### Added Buttons (with and without the extension):
-![](media/img6.jpeg | width=100)
-![](media/img1.jpeg =250x250)
+![](media/img6.jpeg )
+![](media/img1.jpeg)
 ![](media/img4.jpeg)
 ![](media/img5.jpeg)
 ![](media/img3.jpeg)
